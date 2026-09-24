@@ -1,0 +1,1 @@
+"""InsiderShield core module package."""

@@ -1,0 +1,51 @@
+user_id,user_name,department,role,normal_country,normal_city,known_device_id,normal_start_hour,normal_end_hour,avg_daily_download_mb
+EMP_001,Aarav Sharma,Finance,Financial Analyst,India,Coimbatore,DEV_EMP_001_LAPTOP,9,18,15.8
+EMP_002,Priya Patel,Engineering,Software Engineer,India,Bangalore,DEV_EMP_002_LAPTOP,9,18,23.1
+EMP_003,Rajesh Kumar,HR,HR Specialist,India,Chennai,DEV_EMP_003_LAPTOP,9,18,39.3
+EMP_004,Sneha Reddy,Sales,Sales Rep,India,Hyderabad,DEV_EMP_004_LAPTOP,9,18,17.9
+EMP_005,Karthik Menon,IT,Systems Admin,India,Chennai,DEV_EMP_005_LAPTOP,9,18,35.0
+EMP_006,Ananya Nair,Legal,Legal Counsel,India,Mumbai,DEV_EMP_006_LAPTOP,9,18,16.0
+EMP_007,Rohan Verma,Marketing,Marketing Specialist,India,Coimbatore,DEV_EMP_007_LAPTOP,9,18,22.2
+EMP_008,Priya Patel,Sales,Sales Rep,India,Chennai,DEV_EMP_008_LAPTOP,9,18,18.0
+EMP_009,Karthik Gupta,Engineering,Software Engineer,India,Hyderabad,DEV_EMP_009_LAPTOP,9,18,34.9
+EMP_010,Pooja Deshmukh,HR,HR Specialist,India,Hyderabad,DEV_EMP_010_LAPTOP,9,18,21.6
+EMP_011,Arjun Menon,Sales,Sales Rep,India,Hyderabad,DEV_EMP_011_LAPTOP,9,18,28.8
+EMP_012,Meera Joshi,IT,Systems Admin,India,Mumbai,DEV_EMP_012_LAPTOP,9,18,34.4
+EMP_013,Suresh Pillai,Legal,Legal Counsel,India,Coimbatore,DEV_EMP_013_LAPTOP,9,18,40.0
+EMP_014,Rajesh Sharma,Finance,Financial Analyst,India,Coimbatore,DEV_EMP_014_LAPTOP,9,18,28.5
+EMP_015,Aditya Kulkarni,Finance,Financial Analyst,India,Chennai,DEV_EMP_015_LAPTOP,9,18,38.0
+EMP_016,Ritu Bhat,Engineering,Software Engineer,India,Bangalore,DEV_EMP_016_LAPTOP,9,18,24.2
+EMP_017,Manoj Mehta,HR,HR Specialist,India,Chennai,DEV_EMP_017_LAPTOP,9,18,46.6
+EMP_018,Deepika Bose,Sales,Sales Rep,India,Bangalore,DEV_EMP_018_LAPTOP,9,18,18.4
+EMP_019,Sanjay Saxena,IT,Systems Admin,India,Mumbai,DEV_EMP_019_LAPTOP,9,18,18.2
+EMP_020,Neha Sen,Legal,Legal Counsel,India,Bangalore,DEV_EMP_020_LAPTOP,9,18,34.9
+EMP_021,Harish Nambiar,Marketing,Marketing Specialist,India,Coimbatore,DEV_EMP_021_LAPTOP,9,18,39.1
+EMP_022,Vikram Iyer,Engineering,Software Engineer,India,Bangalore,DEV_EMP_022_LAPTOP,9,18,45.0
+EMP_023,Naveen Chatterjee,Engineering,Software Engineer,India,Hyderabad,DEV_EMP_023_LAPTOP,9,18,19.1
+EMP_024,Preeti Mishra,HR,HR Specialist,India,Mumbai,DEV_EMP_024_LAPTOP,9,18,17.6
+EMP_025,Gaurav Agarwal,Sales,Sales Rep,India,Bangalore,DEV_EMP_025_LAPTOP,9,18,42.4
+EMP_026,Sunita Kapoor,IT,Systems Admin,India,Hyderabad,DEV_EMP_026_LAPTOP,9,18,44.2
+EMP_027,Ashok Trivedi,Legal,Legal Counsel,India,Bangalore,DEV_EMP_027_LAPTOP,9,18,34.1
+EMP_028,Shreya Banerjee,Marketing,Marketing Specialist,India,Coimbatore,DEV_EMP_028_LAPTOP,9,18,16.5
+EMP_029,Vijay Ghosh,Finance,Financial Analyst,India,Chennai,DEV_EMP_029_LAPTOP,9,18,40.5
+EMP_030,Aarthi Dutta,Engineering,Software Engineer,India,Coimbatore,DEV_EMP_030_LAPTOP,9,18,43.2
+EMP_031,Sneha Reddy,HR,HR Specialist,India,Bangalore,DEV_EMP_031_LAPTOP,9,18,22.0
+EMP_032,Rashmi Shukla,Sales,Sales Rep,India,Coimbatore,DEV_EMP_032_LAPTOP,9,18,27.5
+EMP_033,Amit Gokhale,IT,Systems Admin,India,Mumbai,DEV_EMP_033_LAPTOP,9,18,36.0
+EMP_034,Nandini Srivastava,Legal,Legal Counsel,India,Bangalore,DEV_EMP_034_LAPTOP,9,18,20.4
+EMP_035,Kiran Chowdhury,Marketing,Marketing Specialist,India,Bangalore,DEV_EMP_035_LAPTOP,9,18,21.9
+EMP_036,Geeta Mukherjee,Finance,Financial Analyst,India,Bangalore,DEV_EMP_036_LAPTOP,9,18,38.2
+EMP_037,Vinod Das,Engineering,Software Engineer,India,Coimbatore,DEV_EMP_037_LAPTOP,9,18,35.1
+EMP_038,Aparna Bhattacharya,HR,HR Specialist,India,Chennai,DEV_EMP_038_LAPTOP,9,18,32.6
+EMP_039,Alok Chauhan,Sales,Sales Rep,India,Chennai,DEV_EMP_039_LAPTOP,9,18,20.4
+EMP_040,Vandana Bhardwaj,IT,Systems Admin,India,Mumbai,DEV_EMP_040_LAPTOP,9,18,23.9
+EMP_041,Siddharth Subramanian,Legal,Legal Counsel,India,Hyderabad,DEV_EMP_041_LAPTOP,9,18,22.2
+EMP_042,Bhavna Ranganathan,Marketing,Marketing Specialist,India,Bangalore,DEV_EMP_042_LAPTOP,9,18,42.8
+EMP_043,Manish Sundaram,Finance,Financial Analyst,India,Coimbatore,DEV_EMP_043_LAPTOP,9,18,22.6
+EMP_044,Tara Krishnan,Engineering,Software Engineer,India,Coimbatore,DEV_EMP_044_LAPTOP,9,18,41.6
+EMP_045,Chetan Venkat,HR,HR Specialist,India,Mumbai,DEV_EMP_045_LAPTOP,9,18,23.8
+EMP_046,Varun Raghavan,Sales,Sales Rep,United States,New York,DEV_EMP_046_LAPTOP,9,18,45.1
+EMP_047,Maya Venkatesh,IT,Systems Admin,United States,Austin,DEV_EMP_047_LAPTOP,9,18,43.9
+EMP_048,John Miller,Legal,Legal Counsel,United States,San Francisco,DEV_EMP_048_LAPTOP,9,18,22.0
+EMP_049,Sarah Jenkins,Marketing,Marketing Specialist,UK,Manchester,DEV_EMP_049_LAPTOP,9,18,28.1
+EMP_050,Oliver Smith,Finance,Financial Analyst,UK,Manchester,DEV_EMP_050_LAPTOP,9,18,19.7
