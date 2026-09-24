@@ -1,0 +1,1302 @@
+{
+  "EMP_001": {
+    "user_id": "EMP_001",
+    "user_name": "Aarav Sharma",
+    "department": "Finance",
+    "role": "Financial Analyst",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_001_LAPTOP"
+    ],
+    "avg_download_mb": 5.6,
+    "max_normal_download_mb": 11.96,
+    "allowed_departments": [
+      "Finance"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_002": {
+    "user_id": "EMP_002",
+    "user_name": "Priya Patel",
+    "department": "Engineering",
+    "role": "Software Engineer",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_002_LAPTOP"
+    ],
+    "avg_download_mb": 6.79,
+    "max_normal_download_mb": 11.12,
+    "allowed_departments": [
+      "Engineering"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_003": {
+    "user_id": "EMP_003",
+    "user_name": "Rajesh Kumar",
+    "department": "HR",
+    "role": "HR Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Chennai"
+    ],
+    "known_devices": [
+      "DEV_EMP_003_LAPTOP"
+    ],
+    "avg_download_mb": 5.68,
+    "max_normal_download_mb": 11.93,
+    "allowed_departments": [
+      "HR"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_004": {
+    "user_id": "EMP_004",
+    "user_name": "Sneha Reddy",
+    "department": "Sales",
+    "role": "Sales Rep",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Hyderabad"
+    ],
+    "known_devices": [
+      "DEV_EMP_004_LAPTOP"
+    ],
+    "avg_download_mb": 6.87,
+    "max_normal_download_mb": 11.71,
+    "allowed_departments": [
+      "Sales"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_005": {
+    "user_id": "EMP_005",
+    "user_name": "Karthik Menon",
+    "department": "IT",
+    "role": "Systems Admin",
+    "normal_work_start": 9,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Chennai"
+    ],
+    "known_devices": [
+      "DEV_EMP_005_LAPTOP"
+    ],
+    "avg_download_mb": 6.24,
+    "max_normal_download_mb": 11.71,
+    "allowed_departments": [
+      "IT"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_006": {
+    "user_id": "EMP_006",
+    "user_name": "Ananya Nair",
+    "department": "Legal",
+    "role": "Legal Counsel",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Mumbai"
+    ],
+    "known_devices": [
+      "DEV_EMP_006_LAPTOP"
+    ],
+    "avg_download_mb": 6.46,
+    "max_normal_download_mb": 11.99,
+    "allowed_departments": [
+      "Legal"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_007": {
+    "user_id": "EMP_007",
+    "user_name": "Rohan Verma",
+    "department": "Marketing",
+    "role": "Marketing Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_007_LAPTOP"
+    ],
+    "avg_download_mb": 5.32,
+    "max_normal_download_mb": 10.79,
+    "allowed_departments": [
+      "Marketing"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_008": {
+    "user_id": "EMP_008",
+    "user_name": "Priya Patel",
+    "department": "Sales",
+    "role": "Sales Rep",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Chennai"
+    ],
+    "known_devices": [
+      "DEV_EMP_008_LAPTOP"
+    ],
+    "avg_download_mb": 6.23,
+    "max_normal_download_mb": 11.68,
+    "allowed_departments": [
+      "Sales"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_009": {
+    "user_id": "EMP_009",
+    "user_name": "Karthik Gupta",
+    "department": "Engineering",
+    "role": "Software Engineer",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Hyderabad"
+    ],
+    "known_devices": [
+      "DEV_EMP_009_LAPTOP"
+    ],
+    "avg_download_mb": 6.0,
+    "max_normal_download_mb": 11.96,
+    "allowed_departments": [
+      "Engineering"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_010": {
+    "user_id": "EMP_010",
+    "user_name": "Pooja Deshmukh",
+    "department": "HR",
+    "role": "HR Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Hyderabad"
+    ],
+    "known_devices": [
+      "DEV_EMP_010_LAPTOP"
+    ],
+    "avg_download_mb": 5.64,
+    "max_normal_download_mb": 10.84,
+    "allowed_departments": [
+      "HR"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_011": {
+    "user_id": "EMP_011",
+    "user_name": "Arjun Menon",
+    "department": "Sales",
+    "role": "Sales Rep",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Hyderabad"
+    ],
+    "known_devices": [
+      "DEV_EMP_011_LAPTOP"
+    ],
+    "avg_download_mb": 6.13,
+    "max_normal_download_mb": 11.05,
+    "allowed_departments": [
+      "Sales"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_012": {
+    "user_id": "EMP_012",
+    "user_name": "Meera Joshi",
+    "department": "IT",
+    "role": "Systems Admin",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Mumbai"
+    ],
+    "known_devices": [
+      "DEV_EMP_012_LAPTOP"
+    ],
+    "avg_download_mb": 5.88,
+    "max_normal_download_mb": 10.33,
+    "allowed_departments": [
+      "IT"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_013": {
+    "user_id": "EMP_013",
+    "user_name": "Suresh Pillai",
+    "department": "Legal",
+    "role": "Legal Counsel",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_013_LAPTOP"
+    ],
+    "avg_download_mb": 6.57,
+    "max_normal_download_mb": 11.79,
+    "allowed_departments": [
+      "Legal"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_014": {
+    "user_id": "EMP_014",
+    "user_name": "Rajesh Sharma",
+    "department": "Finance",
+    "role": "Financial Analyst",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_014_LAPTOP"
+    ],
+    "avg_download_mb": 5.22,
+    "max_normal_download_mb": 11.58,
+    "allowed_departments": [
+      "Finance"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_015": {
+    "user_id": "EMP_015",
+    "user_name": "Aditya Kulkarni",
+    "department": "Finance",
+    "role": "Financial Analyst",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Chennai"
+    ],
+    "known_devices": [
+      "DEV_EMP_015_LAPTOP"
+    ],
+    "avg_download_mb": 7.69,
+    "max_normal_download_mb": 11.87,
+    "allowed_departments": [
+      "Finance"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_016": {
+    "user_id": "EMP_016",
+    "user_name": "Ritu Bhat",
+    "department": "Engineering",
+    "role": "Software Engineer",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_016_LAPTOP"
+    ],
+    "avg_download_mb": 7.46,
+    "max_normal_download_mb": 11.61,
+    "allowed_departments": [
+      "Engineering"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_017": {
+    "user_id": "EMP_017",
+    "user_name": "Manoj Mehta",
+    "department": "HR",
+    "role": "HR Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Chennai"
+    ],
+    "known_devices": [
+      "DEV_EMP_017_LAPTOP"
+    ],
+    "avg_download_mb": 5.58,
+    "max_normal_download_mb": 11.88,
+    "allowed_departments": [
+      "HR"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_018": {
+    "user_id": "EMP_018",
+    "user_name": "Deepika Bose",
+    "department": "Sales",
+    "role": "Sales Rep",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_018_LAPTOP"
+    ],
+    "avg_download_mb": 6.03,
+    "max_normal_download_mb": 11.49,
+    "allowed_departments": [
+      "Sales"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_019": {
+    "user_id": "EMP_019",
+    "user_name": "Sanjay Saxena",
+    "department": "IT",
+    "role": "Systems Admin",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Mumbai"
+    ],
+    "known_devices": [
+      "DEV_EMP_019_LAPTOP"
+    ],
+    "avg_download_mb": 5.97,
+    "max_normal_download_mb": 11.04,
+    "allowed_departments": [
+      "IT"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_020": {
+    "user_id": "EMP_020",
+    "user_name": "Neha Sen",
+    "department": "Legal",
+    "role": "Legal Counsel",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_020_LAPTOP"
+    ],
+    "avg_download_mb": 6.19,
+    "max_normal_download_mb": 11.36,
+    "allowed_departments": [
+      "Legal"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_021": {
+    "user_id": "EMP_021",
+    "user_name": "Harish Nambiar",
+    "department": "Marketing",
+    "role": "Marketing Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_021_LAPTOP"
+    ],
+    "avg_download_mb": 6.04,
+    "max_normal_download_mb": 11.16,
+    "allowed_departments": [
+      "Marketing"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_022": {
+    "user_id": "EMP_022",
+    "user_name": "Vikram Iyer",
+    "department": "Engineering",
+    "role": "Software Engineer",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_022_LAPTOP"
+    ],
+    "avg_download_mb": 5.28,
+    "max_normal_download_mb": 11.74,
+    "allowed_departments": [
+      "Engineering"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_023": {
+    "user_id": "EMP_023",
+    "user_name": "Naveen Chatterjee",
+    "department": "Engineering",
+    "role": "Software Engineer",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Hyderabad"
+    ],
+    "known_devices": [
+      "DEV_EMP_023_LAPTOP"
+    ],
+    "avg_download_mb": 6.3,
+    "max_normal_download_mb": 11.77,
+    "allowed_departments": [
+      "Engineering"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_024": {
+    "user_id": "EMP_024",
+    "user_name": "Preeti Mishra",
+    "department": "HR",
+    "role": "HR Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Mumbai"
+    ],
+    "known_devices": [
+      "DEV_EMP_024_LAPTOP"
+    ],
+    "avg_download_mb": 4.83,
+    "max_normal_download_mb": 9.27,
+    "allowed_departments": [
+      "HR"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_025": {
+    "user_id": "EMP_025",
+    "user_name": "Gaurav Agarwal",
+    "department": "Sales",
+    "role": "Sales Rep",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_025_LAPTOP"
+    ],
+    "avg_download_mb": 5.79,
+    "max_normal_download_mb": 11.08,
+    "allowed_departments": [
+      "Sales"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_026": {
+    "user_id": "EMP_026",
+    "user_name": "Sunita Kapoor",
+    "department": "IT",
+    "role": "Systems Admin",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Hyderabad"
+    ],
+    "known_devices": [
+      "DEV_EMP_026_LAPTOP"
+    ],
+    "avg_download_mb": 6.54,
+    "max_normal_download_mb": 10.43,
+    "allowed_departments": [
+      "IT"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_027": {
+    "user_id": "EMP_027",
+    "user_name": "Ashok Trivedi",
+    "department": "Legal",
+    "role": "Legal Counsel",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_027_LAPTOP"
+    ],
+    "avg_download_mb": 5.48,
+    "max_normal_download_mb": 11.97,
+    "allowed_departments": [
+      "Legal"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_028": {
+    "user_id": "EMP_028",
+    "user_name": "Shreya Banerjee",
+    "department": "Marketing",
+    "role": "Marketing Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_028_LAPTOP"
+    ],
+    "avg_download_mb": 4.75,
+    "max_normal_download_mb": 11.71,
+    "allowed_departments": [
+      "Marketing"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_029": {
+    "user_id": "EMP_029",
+    "user_name": "Vijay Ghosh",
+    "department": "Finance",
+    "role": "Financial Analyst",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Chennai"
+    ],
+    "known_devices": [
+      "DEV_EMP_029_LAPTOP"
+    ],
+    "avg_download_mb": 6.42,
+    "max_normal_download_mb": 11.06,
+    "allowed_departments": [
+      "Finance"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_030": {
+    "user_id": "EMP_030",
+    "user_name": "Aarthi Dutta",
+    "department": "Engineering",
+    "role": "Software Engineer",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_030_LAPTOP"
+    ],
+    "avg_download_mb": 5.64,
+    "max_normal_download_mb": 11.37,
+    "allowed_departments": [
+      "Engineering"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_031": {
+    "user_id": "EMP_031",
+    "user_name": "Sneha Reddy",
+    "department": "HR",
+    "role": "HR Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_031_LAPTOP"
+    ],
+    "avg_download_mb": 5.4,
+    "max_normal_download_mb": 11.69,
+    "allowed_departments": [
+      "HR"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_032": {
+    "user_id": "EMP_032",
+    "user_name": "Rashmi Shukla",
+    "department": "Sales",
+    "role": "Sales Rep",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_032_LAPTOP"
+    ],
+    "avg_download_mb": 6.6,
+    "max_normal_download_mb": 11.65,
+    "allowed_departments": [
+      "Sales"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_033": {
+    "user_id": "EMP_033",
+    "user_name": "Amit Gokhale",
+    "department": "IT",
+    "role": "Systems Admin",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Mumbai"
+    ],
+    "known_devices": [
+      "DEV_EMP_033_LAPTOP"
+    ],
+    "avg_download_mb": 6.07,
+    "max_normal_download_mb": 11.85,
+    "allowed_departments": [
+      "IT"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_034": {
+    "user_id": "EMP_034",
+    "user_name": "Nandini Srivastava",
+    "department": "Legal",
+    "role": "Legal Counsel",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_034_LAPTOP"
+    ],
+    "avg_download_mb": 6.3,
+    "max_normal_download_mb": 11.17,
+    "allowed_departments": [
+      "Legal"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_035": {
+    "user_id": "EMP_035",
+    "user_name": "Kiran Chowdhury",
+    "department": "Marketing",
+    "role": "Marketing Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_035_LAPTOP"
+    ],
+    "avg_download_mb": 6.05,
+    "max_normal_download_mb": 10.88,
+    "allowed_departments": [
+      "Marketing"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_036": {
+    "user_id": "EMP_036",
+    "user_name": "Geeta Mukherjee",
+    "department": "Finance",
+    "role": "Financial Analyst",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_036_LAPTOP"
+    ],
+    "avg_download_mb": 6.79,
+    "max_normal_download_mb": 11.82,
+    "allowed_departments": [
+      "Finance"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_037": {
+    "user_id": "EMP_037",
+    "user_name": "Vinod Das",
+    "department": "Engineering",
+    "role": "Software Engineer",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_037_LAPTOP"
+    ],
+    "avg_download_mb": 6.61,
+    "max_normal_download_mb": 9.95,
+    "allowed_departments": [
+      "Engineering"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_038": {
+    "user_id": "EMP_038",
+    "user_name": "Aparna Bhattacharya",
+    "department": "HR",
+    "role": "HR Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Chennai"
+    ],
+    "known_devices": [
+      "DEV_EMP_038_LAPTOP"
+    ],
+    "avg_download_mb": 6.37,
+    "max_normal_download_mb": 10.74,
+    "allowed_departments": [
+      "HR"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_039": {
+    "user_id": "EMP_039",
+    "user_name": "Alok Chauhan",
+    "department": "Sales",
+    "role": "Sales Rep",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Chennai"
+    ],
+    "known_devices": [
+      "DEV_EMP_039_LAPTOP"
+    ],
+    "avg_download_mb": 6.5,
+    "max_normal_download_mb": 11.38,
+    "allowed_departments": [
+      "Sales"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_040": {
+    "user_id": "EMP_040",
+    "user_name": "Vandana Bhardwaj",
+    "department": "IT",
+    "role": "Systems Admin",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Mumbai"
+    ],
+    "known_devices": [
+      "DEV_EMP_040_LAPTOP"
+    ],
+    "avg_download_mb": 7.0,
+    "max_normal_download_mb": 11.83,
+    "allowed_departments": [
+      "IT"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_041": {
+    "user_id": "EMP_041",
+    "user_name": "Siddharth Subramanian",
+    "department": "Legal",
+    "role": "Legal Counsel",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Hyderabad"
+    ],
+    "known_devices": [
+      "DEV_EMP_041_LAPTOP"
+    ],
+    "avg_download_mb": 6.35,
+    "max_normal_download_mb": 11.2,
+    "allowed_departments": [
+      "Legal"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_042": {
+    "user_id": "EMP_042",
+    "user_name": "Bhavna Ranganathan",
+    "department": "Marketing",
+    "role": "Marketing Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Bangalore"
+    ],
+    "known_devices": [
+      "DEV_EMP_042_LAPTOP"
+    ],
+    "avg_download_mb": 6.75,
+    "max_normal_download_mb": 11.14,
+    "allowed_departments": [
+      "Marketing"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_043": {
+    "user_id": "EMP_043",
+    "user_name": "Manish Sundaram",
+    "department": "Finance",
+    "role": "Financial Analyst",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_043_LAPTOP"
+    ],
+    "avg_download_mb": 5.35,
+    "max_normal_download_mb": 11.36,
+    "allowed_departments": [
+      "Finance"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_044": {
+    "user_id": "EMP_044",
+    "user_name": "Tara Krishnan",
+    "department": "Engineering",
+    "role": "Software Engineer",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Coimbatore"
+    ],
+    "known_devices": [
+      "DEV_EMP_044_LAPTOP"
+    ],
+    "avg_download_mb": 6.78,
+    "max_normal_download_mb": 11.97,
+    "allowed_departments": [
+      "Engineering"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_045": {
+    "user_id": "EMP_045",
+    "user_name": "Chetan Venkat",
+    "department": "HR",
+    "role": "HR Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "India"
+    ],
+    "known_cities": [
+      "Mumbai"
+    ],
+    "known_devices": [
+      "DEV_EMP_045_LAPTOP"
+    ],
+    "avg_download_mb": 5.21,
+    "max_normal_download_mb": 10.5,
+    "allowed_departments": [
+      "HR"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_046": {
+    "user_id": "EMP_046",
+    "user_name": "Varun Raghavan",
+    "department": "Sales",
+    "role": "Sales Rep",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "United States"
+    ],
+    "known_cities": [
+      "New York"
+    ],
+    "known_devices": [
+      "DEV_EMP_046_LAPTOP"
+    ],
+    "avg_download_mb": 5.89,
+    "max_normal_download_mb": 10.88,
+    "allowed_departments": [
+      "Sales"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_047": {
+    "user_id": "EMP_047",
+    "user_name": "Maya Venkatesh",
+    "department": "IT",
+    "role": "Systems Admin",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "United States"
+    ],
+    "known_cities": [
+      "Austin"
+    ],
+    "known_devices": [
+      "DEV_EMP_047_LAPTOP"
+    ],
+    "avg_download_mb": 8.01,
+    "max_normal_download_mb": 11.83,
+    "allowed_departments": [
+      "IT"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_048": {
+    "user_id": "EMP_048",
+    "user_name": "John Miller",
+    "department": "Legal",
+    "role": "Legal Counsel",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "United States"
+    ],
+    "known_cities": [
+      "San Francisco"
+    ],
+    "known_devices": [
+      "DEV_EMP_048_LAPTOP"
+    ],
+    "avg_download_mb": 6.85,
+    "max_normal_download_mb": 11.65,
+    "allowed_departments": [
+      "Legal"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_049": {
+    "user_id": "EMP_049",
+    "user_name": "Sarah Jenkins",
+    "department": "Marketing",
+    "role": "Marketing Specialist",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "UK"
+    ],
+    "known_cities": [
+      "Manchester"
+    ],
+    "known_devices": [
+      "DEV_EMP_049_LAPTOP"
+    ],
+    "avg_download_mb": 4.62,
+    "max_normal_download_mb": 8.93,
+    "allowed_departments": [
+      "Marketing"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  },
+  "EMP_050": {
+    "user_id": "EMP_050",
+    "user_name": "Oliver Smith",
+    "department": "Finance",
+    "role": "Financial Analyst",
+    "normal_work_start": 8,
+    "normal_work_end": 17,
+    "known_countries": [
+      "UK"
+    ],
+    "known_cities": [
+      "Manchester"
+    ],
+    "known_devices": [
+      "DEV_EMP_050_LAPTOP"
+    ],
+    "avg_download_mb": 5.84,
+    "max_normal_download_mb": 10.15,
+    "allowed_departments": [
+      "Finance"
+    ],
+    "normal_sensitivity": [
+      "low",
+      "medium"
+    ]
+  }
+}
