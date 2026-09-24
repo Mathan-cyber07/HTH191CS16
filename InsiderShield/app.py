@@ -1,24 +1,25 @@
-"""InsiderShield — Explainable, Capacity-Aware SOC Analyst Command Center.
+"""InsiderShield — Insider Threat Attack Simulator & Analyst Console.
 
-A 4-page Streamlit application providing decision-support intelligence for SOC investigators:
-- Page 1: Executive Overview Dashboard
-- Page 2: Capacity-Aware Investigation Queue
-- Page 3: Incident Deep-Dive & Explanation Checklist
-- Page 4: Side-by-Side Baseline Comparison & Drift Visualization
+An intuitive, visually striking 3-view command center designed for judges & SOC analysts:
+- VIEW 1: 🎮 Attack Simulator & Live Ingestion (Interactive scenario cards & step-by-step log stream)
+- VIEW 2: 🎯 Capacity-Aware Triage Queue (Strict N=3 analyst workload slots + deferred backlog)
+- VIEW 3: 🔍 Explainable Incident Investigator (8-rule checklist, behavioral shift matrix, & decision console)
 """
 
 import json
 import os
+import time
 from datetime import datetime
+from typing import Dict, Any, List
 import pandas as pd
-import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
 from src.baseline import UserBaselineProfiler
+from src.detector import ExplainableDetector
+from src.scorer import RiskScorer
 from src.correlator import IncidentCorrelator
-from src.pipeline import run_pipeline
 from src.queue import CapacityQueueManager
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "data"))
@@ -28,88 +29,122 @@ BASELINES_PATH = os.path.join(DATA_DIR, "user_baselines.json")
 INCIDENTS_PATH = os.path.join(DATA_DIR, "incidents.json")
 
 st.set_page_config(
-    page_title="InsiderShield | SOC Intelligence",
+    page_title="InsiderShield | Attack Simulator & SOC Console",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # -----------------------------------------------------------------------------
-# Custom Styling & CSS
+# Sleek Cybersecurity UI Styles
 # -----------------------------------------------------------------------------
 st.markdown("""
 <style>
-    .metric-card {
-        background-color: #1a1e29;
-        border: 1px solid #2d3748;
-        border-radius: 8px;
+    .main-header {
+        font-size: 26px;
+        font-weight: 700;
+        color: #f8fafc;
+        margin-bottom: 2px;
+    }
+    .sub-header {
+        font-size: 14px;
+        color: #94a3b8;
+        margin-bottom: 18px;
+    }
+    .scenario-card {
+        background-color: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 10px;
         padding: 16px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .scenario-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #38bdf8;
+        margin-bottom: 6px;
+    }
+    .scenario-desc {
+        font-size: 13px;
+        color: #cbd5e1;
+        line-height: 1.4;
         margin-bottom: 12px;
     }
     .badge-critical {
-        background-color: #dc2626;
+        background-color: #ef4444;
         color: white;
-        padding: 4px 10px;
+        padding: 3px 8px;
         border-radius: 4px;
-        font-weight: 600;
-        font-size: 13px;
+        font-weight: 700;
+        font-size: 12px;
     }
     .badge-high {
-        background-color: #ea580c;
+        background-color: #f97316;
         color: white;
-        padding: 4px 10px;
+        padding: 3px 8px;
         border-radius: 4px;
-        font-weight: 600;
-        font-size: 13px;
+        font-weight: 700;
+        font-size: 12px;
     }
     .badge-medium {
-        background-color: #d97706;
-        color: white;
-        padding: 4px 10px;
+        background-color: #eab308;
+        color: #0f172a;
+        padding: 3px 8px;
         border-radius: 4px;
-        font-weight: 600;
-        font-size: 13px;
+        font-weight: 700;
+        font-size: 12px;
     }
     .badge-low {
-        background-color: #16a34a;
+        background-color: #22c55e;
         color: white;
-        padding: 4px 10px;
+        padding: 3px 8px;
         border-radius: 4px;
-        font-weight: 600;
-        font-size: 13px;
-    }
-    .badge-active {
-        background-color: #2563eb;
-        color: white;
-        padding: 3px 8px;
-        border-radius: 3px;
+        font-weight: 700;
         font-size: 12px;
     }
-    .badge-backlog {
-        background-color: #4b5563;
-        color: #e5e7eb;
-        padding: 3px 8px;
-        border-radius: 3px;
-        font-size: 12px;
-    }
-    .reason-box {
-        background-color: #131924;
-        border-left: 4px solid #3b82f6;
+    .rule-violation {
+        background-color: #450a0a;
+        border-left: 4px solid #ef4444;
         padding: 10px 14px;
-        margin: 6px 0;
         border-radius: 0 6px 6px 0;
-        font-family: monospace;
+        margin-bottom: 8px;
         font-size: 13px;
+    }
+    .rule-passed {
+        background-color: #064e3b;
+        border-left: 4px solid #10b981;
+        padding: 8px 14px;
+        border-radius: 0 6px 6px 0;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #a7f3d0;
+    }
+    .workload-slot-active {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        border: 1px solid #3b82f6;
+        border-radius: 8px;
+        padding: 14px;
+        color: white;
+    }
+    .workload-slot-empty {
+        background-color: #0f172a;
+        border: 1px dashed #475569;
+        border-radius: 8px;
+        padding: 14px;
+        color: #94a3b8;
     }
 </style>
 """, unsafe_allow_html=True)
 
 
 # -----------------------------------------------------------------------------
-# Data Loading & Session State Management
+# Data Ingestion & State Management
 # -----------------------------------------------------------------------------
 @st.cache_data
-def load_base_data():
+def get_static_data():
     users_df = pd.read_csv(USERS_PATH) if os.path.exists(USERS_PATH) else pd.DataFrame()
     logs_df = pd.read_csv(LOGS_PATH) if os.path.exists(LOGS_PATH) else pd.DataFrame()
     with open(BASELINES_PATH, "r", encoding="utf-8") as f:
@@ -117,522 +152,571 @@ def load_base_data():
     return users_df, logs_df, baselines
 
 
-def init_state():
-    if "incidents" not in st.session_state or not st.session_state.incidents:
-        if os.path.exists(INCIDENTS_PATH):
-            st.session_state.incidents = IncidentCorrelator.load_incidents(INCIDENTS_PATH)
-        else:
-            res = run_pipeline()
-            st.session_state.incidents = res["incidents"]
+users_df, logs_df, baselines_dict = get_static_data()
+detector = ExplainableDetector(baselines_dict=baselines_dict)
+correlator = IncidentCorrelator(window_minutes=30)
 
-    if "incident_status_override" not in st.session_state:
-        st.session_state.incident_status_override = {}
+SCENARIOS = {
+    "scenario_a_compromised_finance": {
+        "letter": "A",
+        "title": "Stolen Credentials (Finance)",
+        "target": "Rajesh Sharma (EMP_014)",
+        "department": "Finance",
+        "icon": "💸",
+        "description": "Attacker logs in from Moscow, Russia via unknown device at 02:15 AM, accesses confidential payroll, and downloads 2,048 MB.",
+        "expected_severity": "Critical",
+        "risk_tag": "CRITICAL RISK",
+        "is_attack": True,
+    },
+    "scenario_b_malicious_dev": {
+        "letter": "B",
+        "title": "Disgruntled Developer (Engineering)",
+        "target": "Vikram Iyer (EMP_022)",
+        "department": "Engineering",
+        "icon": "💻",
+        "description": "Employee logs in late at night (01:30 AM) on authorized laptop, accesses proprietary source code zip, and exfiltrates 3,500 MB.",
+        "expected_severity": "Critical",
+        "risk_tag": "CRITICAL RISK",
+        "is_attack": True,
+    },
+    "scenario_c_privilege_misuse": {
+        "letter": "C",
+        "title": "Privilege Misuse (Sales)",
+        "target": "Priya Patel (EMP_008)",
+        "department": "Sales",
+        "icon": "📑",
+        "description": "Sales Rep snoops outside department bounds during business hours, accessing executive salaries and bonus records in HR.",
+        "expected_severity": "High",
+        "risk_tag": "HIGH RISK",
+        "is_attack": True,
+    },
+    "scenario_d_password_attack": {
+        "letter": "D",
+        "title": "Password Brute-Force (HR)",
+        "target": "Sneha Reddy (EMP_031)",
+        "department": "HR",
+        "icon": "🔓",
+        "description": "6 rapid failed logins from Netherlands attacker IP within 3 mins, followed by 1 successful login and immediate SSN theft.",
+        "expected_severity": "Critical",
+        "risk_tag": "CRITICAL RISK",
+        "is_attack": True,
+    },
+    "scenario_e_benign_anomaly": {
+        "letter": "E",
+        "title": "False Positive Test (IT Support)",
+        "target": "Karthik Menon (EMP_005)",
+        "department": "IT",
+        "icon": "🔧",
+        "description": "Systems admin working late at 11:20 PM from known laptop, downloading 5 MB of low-sensitivity patch logs. SHOULD NOT ALERT heavily.",
+        "expected_severity": "Low / Benign",
+        "risk_tag": "BENIGN / EXPECTED",
+        "is_attack": False,
+    },
+}
 
-    if "capacity" not in st.session_state:
-        st.session_state.capacity = 3
+
+def process_simulation(selected_tag: str = "ALL"):
+    """Evaluate logs and generate correlated incidents based on simulation target."""
+    today_logs = logs_df[logs_df["timestamp"].str.startswith("2026-09-24")].copy()
+    if selected_tag != "ALL":
+        today_logs = today_logs[today_logs["scenario_tag"] == selected_tag]
+
+    events = today_logs.to_dict(orient="records")
+    flagged_events = []
+    user_history = {}
+
+    for evt in events:
+        u_id = evt.get("user_id", "")
+        if u_id not in user_history:
+            user_history[u_id] = []
+        hist = user_history[u_id]
+        triggered = detector.evaluate_event(evt, recent_user_events=hist)
+        hist.append(evt)
+
+        if triggered:
+            evt_copy = dict(evt)
+            evt_copy["triggered_rules"] = triggered
+            flagged_events.append(evt_copy)
+
+    incidents = correlator.correlate_events(flagged_events)
+    return events, flagged_events, incidents
 
 
-init_state()
-users_df, logs_df, baselines_dict = load_base_data()
+# Initialize Session State
+if "active_scenario" not in st.session_state:
+    st.session_state.active_scenario = "ALL"
+    ev, fl, inc = process_simulation("ALL")
+    st.session_state.sim_events = ev
+    st.session_state.sim_flagged = fl
+    st.session_state.incidents = inc
+
+if "capacity" not in st.session_state:
+    st.session_state.capacity = 3
+
+if "incident_status_override" not in st.session_state:
+    st.session_state.incident_status_override = {}
+
+if "live_stream_active" not in st.session_state:
+    st.session_state.live_stream_active = False
 
 
 # -----------------------------------------------------------------------------
 # Global Navigation Sidebar
 # -----------------------------------------------------------------------------
 st.sidebar.markdown("## 🛡️ **InsiderShield**")
-st.sidebar.caption("Explainable Insider Risk Decision-Support System")
+st.sidebar.caption("Explainable Insider Risk Simulator & SOC Console")
 st.sidebar.markdown("---")
 
-st.sidebar.markdown("### ⚙️ **SOC Configuration**")
-capacity = st.sidebar.slider(
-    "Active Investigator Slots (N)",
+st.sidebar.markdown("### 🎛️ **Investigator Capacity**")
+cap_val = st.sidebar.slider(
+    "Active Human Investigator Slots",
     min_value=1,
-    max_value=10,
+    max_value=5,
     value=st.session_state.capacity,
-    help="Limits the number of incidents routed simultaneously to human investigators.",
+    help="Limits the maximum number of threats routed simultaneously to prevent SOC analyst cognitive fatigue.",
 )
-st.session_state.capacity = capacity
+st.session_state.capacity = cap_val
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🧪 **Demo Scenario Injector**")
-st.sidebar.caption("Filter live telemetry to inspect specific scenarios:")
-
-col_s1, col_s2 = st.sidebar.columns(2)
-if col_s1.button("Scenario A", help="Compromised Finance Account"):
-    st.session_state.scenario_filter = "scenario_a_compromised_finance"
-    st.rerun()
-if col_s2.button("Scenario B", help="Malicious Developer"):
-    st.session_state.scenario_filter = "scenario_b_malicious_dev"
-    st.rerun()
-
-col_s3, col_s4 = st.sidebar.columns(2)
-if col_s3.button("Scenario C", help="Privilege Misuse"):
-    st.session_state.scenario_filter = "scenario_c_privilege_misuse"
-    st.rerun()
-if col_s4.button("Scenario D", help="Password Brute Force"):
-    st.session_state.scenario_filter = "scenario_d_password_attack"
-    st.rerun()
-
-col_s5, col_s6 = st.sidebar.columns(2)
-if col_s5.button("Scenario E", help="Benign Anomaly"):
-    st.session_state.scenario_filter = "scenario_e_benign_anomaly"
-    st.rerun()
-if col_s6.button("Full Scan", help="Scan All Today's Events"):
-    st.session_state.scenario_filter = None
-    st.rerun()
-
-st.sidebar.markdown("---")
-page = st.sidebar.radio(
-    "Navigation Views",
+view_selection = st.sidebar.radio(
+    "Console Views",
     [
-        "📊 1. Executive Overview",
-        "🎯 2. Capacity Investigation Queue",
-        "🔍 3. Incident Deep-Dive & Explanations",
-        "⚖️ 4. Baseline vs. Anomaly Comparison",
+        "🎮 1. Attack Simulator & Live Stream",
+        "🎯 2. Capacity-Aware Triage Queue",
+        "🔍 3. Explainable Incident Investigator",
     ],
 )
 
-# Apply runtime status overrides to incidents in session state
-incidents = []
-for inc in st.session_state.incidents:
-    inc_copy = dict(inc)
-    if inc_copy["incident_id"] in st.session_state.incident_status_override:
-        inc_copy["status"] = st.session_state.incident_status_override[inc_copy["incident_id"]]
-    incidents.append(inc_copy)
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🚀 **Quick Scenario Launcher**")
+if st.sidebar.button("⚡ Simulate All 5 Scenarios", use_container_width=True):
+    st.session_state.active_scenario = "ALL"
+    ev, fl, inc = process_simulation("ALL")
+    st.session_state.sim_events = ev
+    st.session_state.sim_flagged = fl
+    st.session_state.incidents = inc
+    st.session_state.live_stream_active = True
+    st.rerun()
 
-# Filter if scenario button clicked
-if getattr(st.session_state, "scenario_filter", None):
-    filtered_inc = [i for i in incidents if i.get("scenario_tag") == st.session_state.scenario_filter]
-    if filtered_inc:
-        display_incidents = filtered_inc
-        st.sidebar.info(f"Filtered: `{st.session_state.scenario_filter}`")
-    else:
-        display_incidents = incidents
-else:
-    display_incidents = incidents
-
-# Rank queue with Capacity Manager
-queue_mgr = CapacityQueueManager(capacity=st.session_state.capacity)
-ranked = queue_mgr.rank_incidents(display_incidents, capacity=st.session_state.capacity)
-rec_queue = ranked["recommended_queue"]
-def_queue = ranked["deferred_queue"]
-queue_metrics = ranked["metrics"]
+st.sidebar.caption("InsiderShield decision-support system. Never automatically punishes employees.")
 
 
 # =============================================================================
-# PAGE 1: EXECUTIVE OVERVIEW
+# VIEW 1: ATTACK SIMULATOR & LIVE INGESTION
 # =============================================================================
-if page.startswith("📊"):
-    st.title("Executive Overview — SOC Command Center")
-    st.markdown("Real-time behavioral telemetry, anomaly distribution, and investigator capacity metrics.")
+if view_selection.startswith("🎮"):
+    st.markdown("<div class='main-header'>🎮 Insider Threat Attack Simulator</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='sub-header'>Test and demonstrate how InsiderShield detects stealthy insider behaviors in real time across 5 diverse threat archetypes.</div>",
+        unsafe_allow_html=True,
+    )
 
-    # High-level KPIs
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        st.metric("Total Events Logged", f"{len(logs_df):,}")
-    with col2:
-        today_events = len(logs_df[logs_df["timestamp"].str.startswith("2026-09-24")])
-        st.metric("Today's Events Scanned", f"{today_events}")
-    with col3:
-        st.metric("Correlated Incidents", f"{len(display_incidents)}")
-    with col4:
-        crit_count = sum(1 for i in display_incidents if i.get("severity") == "Critical")
-        st.metric("Critical Incidents", f"{crit_count}", delta=f"{crit_count} Urgent", delta_color="inverse")
-    with col5:
-        util = queue_metrics["capacity_utilization_pct"]
-        st.metric("Analyst Capacity Util.", f"{util}%", delta=f"{queue_metrics['active_investigations']}/{capacity} Slots")
+    # 5 Scenario Cards Side-by-Side
+    cols = st.columns(5)
+    for idx, (tag, s_info) in enumerate(SCENARIOS.items()):
+        with cols[idx]:
+            card_border = "#ef4444" if s_info["is_attack"] else "#10b981"
+            st.markdown(
+                f"""
+                <div style='background-color:#1e293b; border-top: 4px solid {card_border}; border-radius:8px; padding:12px; min-height: 250px;'>
+                    <div style='font-size:24px;'>{s_info['icon']}</div>
+                    <div style='font-weight:700; font-size:14px; color:#f8fafc; margin-top:4px;'>Scenario {s_info['letter']}</div>
+                    <div style='font-size:13px; font-weight:600; color:#38bdf8;'>{s_info['title']}</div>
+                    <div style='font-size:12px; color:#94a3b8; margin:6px 0;'><b>Target:</b> {s_info['target']}</div>
+                    <div style='font-size:11px; color:#cbd5e1; line-height:1.3;'>{s_info['description']}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            if st.button(f"LAUNCH {s_info['letter']}", key=f"btn_launch_{tag}", use_container_width=True):
+                st.session_state.active_scenario = tag
+                ev, fl, inc = process_simulation(tag)
+                st.session_state.sim_events = ev
+                st.session_state.sim_flagged = fl
+                st.session_state.incidents = inc
+                st.session_state.live_stream_active = True
+                st.rerun()
 
     st.markdown("---")
 
-    # Visuals Row
-    chart_col1, chart_col2 = st.columns(2)
+    # Live Log Ingestion Stream
+    active_tag = st.session_state.active_scenario
+    active_name = (
+        "All 5 Scenarios (Full Telemetry Scan)"
+        if active_tag == "ALL"
+        else f"Scenario {SCENARIOS[active_tag]['letter']}: {SCENARIOS[active_tag]['title']}"
+    )
 
-    with chart_col1:
-        st.subheader("Incidents by Severity Bracket")
-        sev_counts = pd.Series([i["severity"] for i in display_incidents]).value_counts().reset_index()
-        sev_counts.columns = ["Severity", "Count"]
-        color_map = {
-            "Critical": "#dc2626",
-            "High": "#ea580c",
-            "Medium": "#d97706",
-            "Low": "#16a34a",
-        }
-        fig_sev = px.bar(
-            sev_counts,
-            x="Severity",
-            y="Count",
-            color="Severity",
-            color_discrete_map=color_map,
-            text="Count",
-        )
-        fig_sev.update_layout(height=320, showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
-        st.plotly_chart(fig_sev, use_container_width=True)
+    st.subheader(f"📡 Live Telemetry Ingestion Stream — [{active_name}]")
+    st.caption("Incoming synthetic events evaluated instantaneously against 8 explainable behavioral baseline rules.")
 
-    with chart_col2:
-        st.subheader("Incidents by Department")
-        dept_counts = pd.Series([i["department"] for i in display_incidents]).value_counts().reset_index()
-        dept_counts.columns = ["Department", "Count"]
-        fig_dept = px.pie(
-            dept_counts,
-            names="Department",
-            values="Count",
-            color_discrete_sequence=px.colors.qualitative.Plotly,
-            hole=0.45,
-        )
-        fig_dept.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10))
-        st.plotly_chart(fig_dept, use_container_width=True)
+    events_to_show = st.session_state.sim_events
 
-    # Incident Activity Timeline
-    st.subheader("Temporal Anomaly Distribution (2026-09-24)")
-    time_records = []
-    for inc in display_incidents:
-        for evt in inc.get("events", []):
-            time_records.append({
-                "timestamp": evt.get("timestamp"),
-                "user_name": inc["user_name"],
-                "incident_id": inc["incident_id"],
-                "severity": inc["severity"],
-                "risk_score": inc["risk_score"],
-                "event_type": evt.get("event_type"),
-                "resource": evt.get("resource"),
-            })
+    if not events_to_show:
+        st.info("No events in current simulation buffer. Click 'Simulate All 5 Scenarios' above.")
+    else:
+        # Ingestion KPI metrics
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Live Events Ingested", len(events_to_show))
+        m2.metric("Violations Flagged", len(st.session_state.sim_flagged))
+        m3.metric("Correlated Incidents", len(st.session_state.incidents))
+        crit_count = sum(1 for i in st.session_state.incidents if i["severity"] == "Critical")
+        m4.metric("Critical Threats", crit_count)
 
-    if time_records:
-        tdf = pd.DataFrame(time_records)
-        tdf["time"] = pd.to_datetime(tdf["timestamp"])
-        fig_time = px.scatter(
-            tdf,
-            x="time",
-            y="risk_score",
-            color="severity",
-            color_discrete_map=color_map,
-            hover_data=["incident_id", "user_name", "resource"],
-            size=[14] * len(tdf),
-            title="Flagged Telemetry Events Along Timeline",
-        )
-        fig_time.update_layout(height=280, margin=dict(l=10, r=10, t=30, b=10))
-        st.plotly_chart(fig_time, use_container_width=True)
+        st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+
+        # Real-time event review container
+        with st.container():
+            st.markdown("#### Real-Time Log Evaluation Stream")
+            for e_idx, evt in enumerate(events_to_show, start=1):
+                triggered_list = detector.evaluate_event(evt)
+                is_violation = len(triggered_list) > 0
+
+                evt_time = evt.get("timestamp", "").split()[-1]
+                evt_user = f"{evt.get('user_name')} ({evt.get('user_id')})"
+                evt_type = evt.get("event_type", "").upper()
+                evt_res = evt.get("resource", "portal")
+                evt_dl = f"{evt.get('download_mb', 0)} MB"
+                evt_country = evt.get("country", "")
+
+                with st.expander(
+                    f"{'🚨 VIOLATION' if is_violation else '✅ NORMAL'} | {evt_time} | {evt_user} | {evt_type} | {evt_res} ({evt_dl})",
+                    expanded=is_violation,
+                ):
+                    c1, c2, c3, c4 = st.columns(4)
+                    c1.markdown(f"**IP Address:** `{evt.get('source_ip')}`")
+                    c2.markdown(f"**Location:** `{evt_country} ({evt.get('city')})`")
+                    c3.markdown(f"**Device ID:** `{evt.get('device_id')}`")
+                    c4.markdown(f"**Sensitivity:** `{evt.get('resource_sensitivity', 'low').upper()}`")
+
+                    if is_violation:
+                        st.markdown("**Triggered Rule Violations:**")
+                        for r in triggered_list:
+                            st.markdown(
+                                f"<div class='rule-violation'>⚠️ <b>+{r['score']} pts — {r['rule_name']}:</b> {r['reason']}</div>",
+                                unsafe_allow_html=True,
+                            )
+                    else:
+                        st.markdown("<div class='rule-passed'>✅ Activity matches user's historical 14-day baseline.</div>", unsafe_allow_html=True)
 
 
 # =============================================================================
-# PAGE 2: CAPACITY-AWARE INVESTIGATION QUEUE
+# VIEW 2: CAPACITY-AWARE TRIAGE QUEUE (N=3 SLOTS)
 # =============================================================================
-elif page.startswith("🎯"):
-    st.title("Capacity-Aware Prioritized Investigation Queue")
+elif view_selection.startswith("🎯"):
+    st.markdown("<div class='main-header'>🎯 Capacity-Aware Triage Queue</div>", unsafe_allow_html=True)
     st.markdown(
-        f"Prioritizes alerts strictly under **{capacity} Available Human Investigator Slots** "
-        "to prevent cognitive fatigue and ensure high-confidence response."
+        f"<div class='sub-header'>Human security investigators have limited bandwidth. InsiderShield routes only the <b>Top-{st.session_state.capacity}</b> highest-priority incidents to active investigators to prevent cognitive fatigue and missed signals.</div>",
+        unsafe_allow_html=True,
     )
 
-    st.info(
-        f"**Queue Allocation Status:** {len(rec_queue)} Active Investigations assigned to analysts. "
-        f"{len(def_queue)} Incidents deferred in triage backlog."
-    )
+    # Rank current incidents
+    queue_mgr = CapacityQueueManager(capacity=st.session_state.capacity)
+    ranked_data = queue_mgr.rank_incidents(st.session_state.incidents, capacity=st.session_state.capacity)
+    rec_queue = ranked_data["recommended_queue"]
+    def_queue = ranked_data["deferred_queue"]
 
-    st.subheader(f"🛡️ Top-{capacity} Priority Queue (Active Slots)")
-    if rec_queue:
-        table_rows = []
-        for item in rec_queue:
-            flags_str = ", ".join(item["primary_flags"][:3])
-            if len(item["primary_flags"]) > 3:
-                flags_str += f" (+{len(item['primary_flags']) - 3} more)"
+    # Analyst Workload Slots Visual Display
+    st.subheader(f"👥 Active Analyst Workload Slots (Capacity = {st.session_state.capacity})")
+    slot_cols = st.columns(st.session_state.capacity)
 
-            table_rows.append({
-                "Rank": f"#{item['queue_rank']}",
-                "Assigned Analyst": item["assigned_investigator"],
-                "Incident ID": item["incident_id"],
-                "Employee": f"{item['user_name']} ({item['user_id']})",
-                "Department": item["department"],
-                "Severity": item["severity"],
-                "Risk Score": f"{item['risk_score']} / 100",
-                "Priority Score": item["priority_score"],
-                "Primary Triggered Flags": flags_str,
-                "Status": item["status"],
-            })
-        st.dataframe(pd.DataFrame(table_rows), use_container_width=True, hide_index=True)
-    else:
-        st.write("No active incidents in queue.")
-
-    if def_queue:
-        with st.expander(f"⏳ Triage Backlog ({len(def_queue)} Incidents Pending Capacity)", expanded=True):
-            st.warning("⚠️ These incidents exceed current investigator bandwidth and await slot release.")
-            def_rows = []
-            for item in def_queue:
-                def_rows.append({
-                    "Rank": f"#{item['queue_rank']}",
-                    "Incident ID": item["incident_id"],
-                    "Employee": f"{item['user_name']} ({item['user_id']})",
-                    "Department": item["department"],
-                    "Severity": item["severity"],
-                    "Risk Score": item["risk_score"],
-                    "Priority Score": item["priority_score"],
-                    "Status": "Deferred (Backlog)",
-                })
-            st.dataframe(pd.DataFrame(def_rows), use_container_width=True, hide_index=True)
-
-
-# =============================================================================
-# PAGE 3: INCIDENT DEEP-DIVE & EXPLANATION CHECKLIST
-# =============================================================================
-elif page.startswith("🔍"):
-    st.title("Incident Deep-Dive & Explanation Checklist")
-    st.markdown("Inspect exact contributing factors, transparent rule scores, and raw forensic event logs.")
-
-    if not incidents:
-        st.warning("No incidents available to inspect.")
-    else:
-        inc_options = {
-            f"{i['incident_id']} - {i['user_name']} ({i['department']}) [{i['severity']} - Score: {i['risk_score']}]": i
-            for i in incidents
-        }
-        selected_label = st.selectbox("Select Incident to Investigate:", list(inc_options.keys()))
-        selected_inc = inc_options[selected_label]
-
-        st.markdown("---")
-
-        # Incident Summary Header
-        h_col1, h_col2, h_col3, h_col4 = st.columns(4)
-        with h_col1:
-            st.markdown(f"**Employee:** {selected_inc['user_name']} (`{selected_inc['user_id']}`)")
-            st.markdown(f"**Role:** {selected_inc['role']} — {selected_inc['department']}")
-        with h_col2:
-            sev = selected_inc["severity"]
-            sev_class = f"badge-{sev.lower()}"
-            st.markdown(f"**Severity:** <span class='{sev_class}'>{sev.upper()}</span>", unsafe_allow_html=True)
-            st.markdown(f"**Triage Status:** `{selected_inc.get('status', 'Open')}`")
-        with h_col3:
-            st.markdown(f"**Window:** `{selected_inc['start_time']}`")
-            st.markdown(f"**Events in Incident:** `{selected_inc['event_count']}`")
-        with h_col4:
-            st.markdown(f"**Max Asset Sensitivity:** `{selected_inc.get('max_resource_sensitivity', 'N/A').upper()}`")
-            st.markdown(f"**Total Exfiltration:** `{selected_inc.get('total_download_mb', 0.0)} MB`")
-
-        # Risk Score Breakdown Gauge
-        gauge_col, exp_col = st.columns([1, 2])
-        with gauge_col:
-            score = selected_inc["risk_score"]
-            fig_gauge = go.Figure(go.Indicator(
-                mode="gauge+number",
-                value=score,
-                title={"text": "Transparent Risk Score"},
-                gauge={
-                    "axis": {"range": [0, 100]},
-                    "bar": {"color": "#3b82f6"},
-                    "steps": [
-                        {"range": [0, 24], "color": "#16a34a"},
-                        {"range": [25, 49], "color": "#d97706"},
-                        {"range": [50, 74], "color": "#ea580c"},
-                        {"range": [75, 100], "color": "#dc2626"},
-                    ],
-                }
-            ))
-            fig_gauge.update_layout(height=260, margin=dict(l=20, r=20, t=40, b=20))
-            st.plotly_chart(fig_gauge, use_container_width=True)
-
-        with exp_col:
-            st.subheader("📋 Explainable Contributing Factors")
-            st.caption("Discrete rules violated with human-readable rationale (No black-box math):")
-            for r_text in selected_inc.get("reasons", []):
-                st.markdown(f"<div class='reason-box'>⚠️ <b>FLAG:</b> {r_text}</div>", unsafe_allow_html=True)
-
-            score_bd = selected_inc.get("score_breakdown", {})
-            if score_bd:
-                st.caption(
-                    f"**Score Math:** Base Rule Points ({score_bd.get('base_score', 0)}) + "
-                    f"Multi-Signal Pattern Bonus ({score_bd.get('pattern_bonus', 0)}) = "
-                    f"**{score_bd.get('total_score', score)} pts**"
+    for s_idx in range(st.session_state.capacity):
+        with slot_cols[s_idx]:
+            if s_idx < len(rec_queue):
+                item = rec_queue[s_idx]
+                sev_badge = f"badge-{item['severity'].lower()}"
+                st.markdown(
+                    f"""
+                    <div class='workload-slot-active'>
+                        <div style='font-size:12px; color:#93c5fd; font-weight:700;'>SLOT #{s_idx + 1} — {item['assigned_investigator']}</div>
+                        <div style='font-size:18px; font-weight:700; margin:6px 0;'>{item['user_name']}</div>
+                        <div style='font-size:13px; color:#e2e8f0;'>Dept: <b>{item['department']}</b></div>
+                        <div style='margin-top:8px;'>
+                            <span class='{sev_badge}'>{item['severity'].upper()}</span>
+                            <span style='font-size:14px; font-weight:700; margin-left:8px;'>Score: {item['risk_score']}/100</span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f"""
+                    <div class='workload-slot-empty'>
+                        <div style='font-weight:700;'>SLOT #{s_idx + 1}</div>
+                        <div style='margin-top:10px; font-size:14px;'>🟢 Available Slot</div>
+                        <div style='font-size:12px; margin-top:4px;'>No active alert assigned.</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
 
-        st.markdown("---")
-
-        # Chronological Events Table
-        st.subheader("🕒 Chronological Event Timeline")
-        raw_events = selected_inc.get("events", [])
-        if raw_events:
-            ev_df = pd.DataFrame(raw_events)[[
-                "event_id", "timestamp", "event_type", "login_status",
-                "country", "city", "device_id", "resource", "download_mb"
-            ]]
-            st.dataframe(ev_df, use_container_width=True, hide_index=True)
-
-        st.markdown("---")
-
-        # Analyst Action Buttons
-        st.subheader("⚡ Human Analyst Disposition Actions")
-        st.caption("Empower analysts with decision support; record review outcome:")
-        act_col1, act_col2, act_col3, act_col4 = st.columns(4)
-
-        inc_id = selected_inc["incident_id"]
-
-        with act_col1:
-            if st.button("🔎 Mark Investigating", key=f"inv_{inc_id}"):
-                st.session_state.incident_status_override[inc_id] = "Investigating"
-                st.success(f"{inc_id} status updated to: Investigating")
-                st.rerun()
-
-        with act_col2:
-            if st.button("✅ Flag as Benign / Expected", key=f"ben_{inc_id}"):
-                st.session_state.incident_status_override[inc_id] = "Resolved (Benign Anomaly)"
-                st.info(f"{inc_id} resolved as Benign.")
-                st.rerun()
-
-        with act_col3:
-            if st.button("🚨 Escalate to Tier 2 IR", key=f"esc_{inc_id}"):
-                st.session_state.incident_status_override[inc_id] = "Escalated (Tier 2 Incident Response)"
-                st.error(f"{inc_id} escalated to Tier 2 Incident Response!")
-                st.rerun()
-
-        with act_col4:
-            if st.button("📁 Close Incident", key=f"cls_{inc_id}"):
-                st.session_state.incident_status_override[inc_id] = "Closed"
-                st.warning(f"{inc_id} marked as Closed.")
-                st.rerun()
-
-
-# =============================================================================
-# PAGE 4: SIDE-BY-SIDE BASELINE COMPARISON & DRIFT
-# =============================================================================
-elif page.startswith("⚖️"):
-    st.title("Side-by-Side Baseline Comparison & Drift Visualization")
-    st.markdown("Compare an employee's historical 14-day baseline against today's anomalous activity.")
-
-    all_users = list(baselines_dict.keys())
-    # Highlight scenario users first
-    scenario_users = ["EMP_014", "EMP_022", "EMP_008", "EMP_031", "EMP_005"]
-    user_choices = scenario_users + [u for u in all_users if u not in scenario_users]
-
-    selected_u = st.selectbox(
-        "Select User Profile to Compare:",
-        user_choices,
-        format_func=lambda x: f"{x} - {baselines_dict[x]['user_name']} ({baselines_dict[x]['department']})",
-    )
-
-    base = baselines_dict[selected_u]
-
-    # Find today's activity for this user
-    user_today_logs = logs_df[
-        (logs_df["user_id"] == selected_u) & (logs_df["timestamp"].str.startswith("2026-09-24"))
-    ]
-
-    # Compute observed stats for today
-    if not user_today_logs.empty:
-        obs_times = pd.to_datetime(user_today_logs["timestamp"])
-        obs_start_str = obs_times.min().strftime("%H:%M:%S")
-        obs_countries = ", ".join(user_today_logs["country"].unique())
-        obs_devices = ", ".join(user_today_logs["device_id"].unique())
-        obs_dl = user_today_logs["download_mb"].sum()
-        obs_resources = ", ".join(user_today_logs["resource"].unique()[:3])
-    else:
-        obs_start_str = "No events today"
-        obs_countries = "N/A"
-        obs_devices = "N/A"
-        obs_dl = 0.0
-        obs_resources = "N/A"
-
-    st.subheader(f"Profile: {base['user_name']} ({base['user_id']}) — {base['department']}")
-
-    # Precalculate deviation statuses cleanly
-    if not user_today_logs.empty:
-        hours_anom = any(h < base["normal_work_start"] or h > base["normal_work_end"] for h in obs_times.dt.hour)
-        hours_status = "⚠️ Off-Hours Activity" if hours_anom else "✅ Normal"
-
-        country_anom = any(c not in base["known_countries"] for c in user_today_logs["country"].unique())
-        country_status = "⚠️ Foreign Country" if country_anom else "✅ Normal"
-
-        dev_anom = any(d not in base["known_devices"] for d in user_today_logs["device_id"].unique())
-        dev_status = "⚠️ Unregistered Device" if dev_anom else "✅ Normal"
-
-        dl_ratio = round(obs_dl / max(base["avg_download_mb"], 1.0), 1)
-        dl_status = f"⚠️ {dl_ratio}x Baseline Surge" if obs_dl > base["avg_download_mb"] * 5 else "✅ Normal"
-
-        sens_anom = any(s in ["high", "critical"] for s in user_today_logs["resource_sensitivity"])
-        res_status = "⚠️ Sensitive / Critical Access" if sens_anom else "✅ Normal"
-    else:
-        hours_status = "Normal (No Logs)"
-        country_status = "Normal (No Logs)"
-        dev_status = "Normal (No Logs)"
-        dl_status = "Normal (No Logs)"
-        res_status = "Normal (No Logs)"
-
-    # Comparison Grid Table
-    comp_data = [
-        {
-            "Behavioral Metric": "Work Schedule / Login Hours",
-            "Historical 14-Day Baseline": f"{base['normal_work_start']:02d}:00 – {base['normal_work_end']:02d}:00",
-            "Today's Observed Activity": obs_start_str,
-            "Deviation Status": hours_status,
-        },
-        {
-            "Behavioral Metric": "Recognized Countries",
-            "Historical 14-Day Baseline": ", ".join(base["known_countries"]),
-            "Today's Observed Activity": obs_countries,
-            "Deviation Status": country_status,
-        },
-        {
-            "Behavioral Metric": "Authorized Hardware Devices",
-            "Historical 14-Day Baseline": ", ".join(base["known_devices"]),
-            "Today's Observed Activity": obs_devices,
-            "Deviation Status": dev_status,
-        },
-        {
-            "Behavioral Metric": "Daily Download Volume",
-            "Historical 14-Day Baseline": f"Mean: {base['avg_download_mb']} MB (Max: {base['max_normal_download_mb']} MB)",
-            "Today's Observed Activity": f"{obs_dl:.1f} MB",
-            "Deviation Status": dl_status,
-        },
-        {
-            "Behavioral Metric": "Accessed Resources",
-            "Historical 14-Day Baseline": f"{base['department']} Resources ({', '.join(base['normal_sensitivity'])})",
-            "Today's Observed Activity": obs_resources,
-            "Deviation Status": res_status,
-        },
-    ]
-
-    st.table(pd.DataFrame(comp_data))
-
     st.markdown("---")
 
-    # BONUS FEATURE: Baseline Drift Over Time
-    st.subheader("📈 Bonus Feature: Behavioral Baseline Drift Over Time")
-    st.caption("14-day historical daily download volume versus today's observed surge:")
+    # Main Priority Queue Table
+    st.subheader("📋 Active Investigation Queue (Priority Ranked)")
+    st.caption("Priority Formula: `(Risk Score × 0.6) + (Violations × 10) + (Asset Sensitivity × 20)`")
 
-    user_all_logs = logs_df[logs_df["user_id"] == selected_u].copy()
-    user_all_logs["date"] = pd.to_datetime(user_all_logs["timestamp"]).dt.date
-    daily_dl = user_all_logs.groupby("date")["download_mb"].sum().reset_index()
+    if rec_queue:
+        for r_idx, item in enumerate(rec_queue, start=1):
+            with st.container():
+                c_rank, c_info, c_meter, c_flags, c_action = st.columns([1, 4, 3, 4, 2])
+                with c_rank:
+                    st.markdown(f"### #{r_idx}")
+                    st.caption(f"{item['assigned_investigator'].split()[0]}")
 
-    fig_drift = go.Figure()
-    # Baseline normal period
-    normal_dl = daily_dl[daily_dl["date"] < datetime(2026, 9, 24).date()]
-    today_dl = daily_dl[daily_dl["date"] == datetime(2026, 9, 24).date()]
+                with c_info:
+                    st.markdown(f"**{item['user_name']}** (`{item['user_id']}`)")
+                    st.markdown(f"*{item['role']}* — **{item['department']}**")
 
-    fig_drift.add_trace(go.Bar(
-        x=normal_dl["date"].astype(str),
-        y=normal_dl["download_mb"],
-        name="Historical Daily Download (MB)",
-        marker_color="#3b82f6",
-    ))
+                with c_meter:
+                    st.markdown(f"**Risk Score: {item['risk_score']} / 100**")
+                    sev_color = (
+                        "red"
+                        if item["severity"] == "Critical"
+                        else "orange"
+                        if item["severity"] == "High"
+                        else "yellow"
+                    )
+                    st.progress(item["risk_score"] / 100)
+                    st.caption(f"Severity: **{item['severity']}** | Priority Pts: **{item['priority_score']}**")
 
-    # Add baseline average line
-    fig_drift.add_hline(
-        y=base["avg_download_mb"],
-        line_dash="dash",
-        line_color="#22c55e",
-        annotation_text=f"Baseline Avg: {base['avg_download_mb']} MB",
+                with c_flags:
+                    st.markdown("**Key Explainable Flags:**")
+                    for flg in item["primary_flags"][:2]:
+                        st.markdown(f"• `{flg}`")
+                    if len(item["primary_flags"]) > 2:
+                        st.caption(f"+ {len(item['primary_flags']) - 2} more violations")
+
+                with c_action:
+                    st.markdown(f"**Status:** `{item.get('status', 'Open')}`")
+                    if st.button("Inspect 🔍", key=f"insp_btn_{item['incident_id']}"):
+                        st.session_state.selected_incident_id = item["incident_id"]
+                        st.info(f"Navigate to 'Explainable Incident Investigator' to deep dive on {item['user_name']}.")
+
+                st.markdown("<hr style='margin: 8px 0; border-color: #334155;'/>", unsafe_allow_html=True)
+    else:
+        st.write("No incidents currently in active queue.")
+
+    # Expandable Deferred Backlog
+    if def_queue:
+        with st.expander(
+            f"⏳ Deferred Triage Backlog ({len(def_queue)} alerts held back due to capacity limit)",
+            expanded=True,
+        ):
+            st.warning(
+                f"⚠️ These {len(def_queue)} incidents have lower priority scores and are queued to protect investigator focus. Increase capacity in the sidebar to allocate more slots."
+            )
+            b_rows = []
+            for b_idx, b_item in enumerate(def_queue, start=len(rec_queue) + 1):
+                b_rows.append({
+                    "Queue Rank": f"#{b_idx}",
+                    "Employee": f"{b_item['user_name']} ({b_item['user_id']})",
+                    "Department": b_item["department"],
+                    "Severity": b_item["severity"],
+                    "Risk Score": f"{b_item['risk_score']} / 100",
+                    "Priority Score": b_item["priority_score"],
+                    "Violations": ", ".join(b_item["primary_flags"]),
+                    "Status": "Deferred in Backlog",
+                })
+            st.dataframe(pd.DataFrame(b_rows), use_container_width=True, hide_index=True)
+
+
+# =============================================================================
+# VIEW 3: EXPLAINABLE INCIDENT INVESTIGATOR
+# =============================================================================
+elif view_selection.startswith("🔍"):
+    st.markdown("<div class='main-header'>🔍 Explainable Incident Investigator</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='sub-header'>Zero black-box ambiguity. Inspect exact rule violations, historical behavioral shifts, and take human decision-support actions.</div>",
+        unsafe_allow_html=True,
     )
 
-    if not today_dl.empty:
-        fig_drift.add_trace(go.Bar(
-            x=today_dl["date"].astype(str),
-            y=today_dl["download_mb"],
-            name="Today's Anomaly (2026-09-24)",
-            marker_color="#dc2626",
-        ))
+    incidents = st.session_state.incidents
+    if not incidents:
+        st.warning("No incidents available. Please run a simulation in View 1.")
+    else:
+        # Build dropdown options
+        inc_map = {f"{i['incident_id']} — {i['user_name']} ({i['department']}) [{i['severity']} - Score: {i['risk_score']}]": i for i in incidents}
+        default_index = 0
 
-    fig_drift.update_layout(
-        height=340,
-        xaxis_title="Date",
-        yaxis_title="Total Download Volume (MB)",
-        margin=dict(l=20, r=20, t=30, b=20),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-    )
-    st.plotly_chart(fig_drift, use_container_width=True)
+        # Check if pre-selected from Queue view
+        if "selected_incident_id" in st.session_state:
+            for idx, k in enumerate(inc_map.keys()):
+                if inc_map[k]["incident_id"] == st.session_state.selected_incident_id:
+                    default_index = idx
+                    break
+
+        selected_label = st.selectbox("Select Incident to Investigate:", list(inc_map.keys()), index=default_index)
+        sel_inc = inc_map[selected_label]
+        u_id = sel_inc["user_id"]
+        base = baselines_dict.get(u_id, {})
+
+        # Apply runtime status override if analyst took action
+        current_status = st.session_state.incident_status_override.get(sel_inc["incident_id"], sel_inc.get("status", "Open"))
+
+        st.markdown("---")
+
+        # Top Incident Summary Card
+        top_c1, top_c2, top_c3, top_c4 = st.columns(4)
+        with top_c1:
+            st.markdown(f"### {sel_inc['user_name']}")
+            st.markdown(f"**ID:** `{u_id}` | **Dept:** {sel_inc['department']}")
+        with top_c2:
+            sev = sel_inc["severity"]
+            sev_badge = f"badge-{sev.lower()}"
+            st.markdown(f"**Severity:** <span class='{sev_badge}'>{sev.upper()}</span>", unsafe_allow_html=True)
+            st.markdown(f"**Status:** `{current_status}`")
+        with top_c3:
+            st.markdown(f"**Total Downloaded:** `{sel_inc.get('total_download_mb', 0)} MB`")
+            st.markdown(f"**Highest Asset Class:** `{sel_inc.get('max_resource_sensitivity', 'low').upper()}`")
+        with top_c4:
+            st.markdown(f"**Score:** `{sel_inc['risk_score']} / 100`")
+            st.progress(sel_inc["risk_score"] / 100)
+
+        st.markdown("<div style='height:16px;'></div>", unsafe_allow_html=True)
+
+        col_rules, col_matrix = st.columns([1, 1])
+
+        # ---------------------------------------------------------------------
+        # Part A: The 8-Rule Explainability Checklist
+        # ---------------------------------------------------------------------
+        with col_rules:
+            st.subheader("📋 8-Rule Explainability Checklist")
+            st.caption("Full audit trail showing exactly which rules triggered and which passed:")
+
+            all_rules = [
+                ("Off-Hours Activity", 15),
+                ("Anomalous Country/Location", 20),
+                ("Unregistered Device", 15),
+                ("Critical Asset Access", 20),
+                ("Abnormal Download Volume", 20),
+                ("Cross-Department Privilege Anomaly", 25),
+                ("Failed Login Burst", 15),
+                ("Impossible Travel", 25),
+            ]
+
+            triggered_names = sel_inc.get("primary_flags", [])
+            reasons_list = sel_inc.get("reasons", [])
+
+            for r_name, r_pts in all_rules:
+                if r_name in triggered_names:
+                    # Find matching reason string
+                    matched_r = next((r for r in reasons_list if r_name.split()[0].lower() in r.lower()), f"Violation of {r_name}")
+                    st.markdown(
+                        f"""
+                        <div class='rule-violation'>
+                            <div style='font-weight:700; color:#fca5a5;'>❌ VIOLATION (+{r_pts} pts) — {r_name}</div>
+                            <div style='font-size:12px; color:#fecaca; margin-top:2px;'>{matched_r}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.markdown(
+                        f"""
+                        <div class='rule-passed'>
+                            🟢 <b>PASSED (0 pts)</b> — {r_name}: Activity within baseline norms.
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+            # Score computation box
+            bd = sel_inc.get("score_breakdown", {})
+            st.markdown(
+                f"""
+                <div style='background-color:#1e293b; border:1px solid #475569; border-radius:6px; padding:10px; margin-top:10px; font-size:13px;'>
+                    <b>Deterministic Scoring Formula:</b><br/>
+                    Base Points ({bd.get('base_score', sel_inc['risk_score'])}) + Multi-Signal Bonus ({bd.get('pattern_bonus', 0)}) = <b>{sel_inc['risk_score']} / 100 ({sel_inc['severity']})</b>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        # ---------------------------------------------------------------------
+        # Part B: Behavioral Shift Matrix (Normal vs Suspicious)
+        # ---------------------------------------------------------------------
+        with col_matrix:
+            st.subheader("⚖️ Behavioral Shift Matrix")
+            st.caption("Visual contrast of 14-day learned baseline vs. observed telemetry:")
+
+            # Extract observed attributes
+            inc_events = sel_inc.get("events", [])
+            if inc_events:
+                e_df = pd.DataFrame(inc_events)
+                obs_hour = pd.to_datetime(e_df["timestamp"]).dt.strftime("%H:%M:%S").iloc[0]
+                obs_country = ", ".join(e_df["country"].unique())
+                obs_device = ", ".join(e_df["device_id"].unique())
+                obs_dl = f"{sel_inc.get('total_download_mb', 0)} MB"
+                obs_res = ", ".join(e_df["resource"].unique()[:2])
+            else:
+                obs_hour, obs_country, obs_device, obs_dl, obs_res = "N/A", "N/A", "N/A", "N/A", "N/A"
+
+            shift_table = [
+                {
+                    "Metric": "🕒 Activity Hours",
+                    "Normal Baseline (14 Days)": f"{base.get('normal_work_start', 9):02d}:00 – {base.get('normal_work_end', 18):02d}:00",
+                    "Current Observed Behavior": obs_hour,
+                    "Shift": "⚠️ Off-Hours" if any("Off-Hours" in f for f in triggered_names) else "✅ Normal",
+                },
+                {
+                    "Metric": "🌍 Country / Location",
+                    "Normal Baseline (14 Days)": ", ".join(base.get("known_countries", ["India"])),
+                    "Current Observed Behavior": obs_country,
+                    "Shift": "⚠️ New Country" if any("Country" in f for f in triggered_names) else "✅ Normal",
+                },
+                {
+                    "Metric": "💻 Authorized Device",
+                    "Normal Baseline (14 Days)": ", ".join(base.get("known_devices", ["LAPTOP"])),
+                    "Current Observed Behavior": obs_device,
+                    "Shift": "⚠️ Unknown Device" if any("Device" in f for f in triggered_names) else "✅ Normal",
+                },
+                {
+                    "Metric": "📦 Download Volume",
+                    "Normal Baseline (14 Days)": f"Mean: {base.get('avg_download_mb', 20)} MB (Max: {base.get('max_normal_download_mb', 40)} MB)",
+                    "Current Observed Behavior": obs_dl,
+                    "Shift": "⚠️ Exfiltration Spike" if any("Download" in f for f in triggered_names) else "✅ Normal",
+                },
+                {
+                    "Metric": "🔒 Resource Access",
+                    "Normal Baseline (14 Days)": f"{base.get('department')} low/medium assets",
+                    "Current Observed Behavior": obs_res,
+                    "Shift": "⚠️ Unauthorized Asset" if any("Asset" in f or "Privilege" in f for f in triggered_names) else "✅ Normal",
+                },
+            ]
+            st.table(pd.DataFrame(shift_table))
+
+            # Raw Event Log for forensic confirmation
+            with st.expander("🔍 Forensic Event Trail"):
+                st.dataframe(pd.DataFrame(inc_events)[["event_id", "timestamp", "event_type", "resource", "download_mb", "country", "device_id"]], use_container_width=True, hide_index=True)
+
+        st.markdown("---")
+
+        # ---------------------------------------------------------------------
+        # Part C: Interactive Decision Console
+        # ---------------------------------------------------------------------
+        st.subheader("⚡ Human Decision-Support Console")
+        st.caption("Record official analyst triage disposition for this incident:")
+
+        a1, a2, a3 = st.columns(3)
+        inc_id = sel_inc["incident_id"]
+
+        with a1:
+            if st.button("🔒 Lock Employee Account", key=f"btn_lock_{inc_id}", use_container_width=True):
+                st.session_state.incident_status_override[inc_id] = "Account Locked & Contained"
+                st.error(f"🚨 Action Recorded: {sel_inc['user_name']}'s Active Directory account has been LOCKED.")
+                st.rerun()
+
+        with a2:
+            if st.button("✅ Dismiss as Benign", key=f"btn_benign_{inc_id}", use_container_width=True):
+                st.session_state.incident_status_override[inc_id] = "Dismissed (Benign Overtime)"
+                st.success(f"✅ Action Recorded: Incident {inc_id} marked as Expected / Benign.")
+                st.rerun()
+
+        with a3:
+            if st.button("🚨 Escalate to SOC Tier 2", key=f"btn_esc_{inc_id}", use_container_width=True):
+                st.session_state.incident_status_override[inc_id] = "Escalated to Tier 2 IR Team"
+                st.warning(f"⚠️ Action Recorded: Incident {inc_id} escalated for forensic disk acquisition.")
+                st.rerun()
