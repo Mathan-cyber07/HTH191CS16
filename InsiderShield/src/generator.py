@@ -755,6 +755,230 @@ def inject_scenarios(users_df: pd.DataFrame, starting_event_id: int = 200000) ->
     return scenario_logs
 
 
+def simulate_100_events(users_df: Optional[pd.DataFrame] = None) -> List[Dict[str, Any]]:
+    """Generate 100 realistic corporate workday events for enterprise stress testing.
+    
+    Composition:
+    - 87 events: Completely normal, routine business-hour activity (Risk Score: 0 pts)
+    - 8 events: Mild anomalies / benign false positives (Risk Score: 15-35 pts)
+    - Exactly 5 events: Critical / high real threat attacks (Risk Score: 75-100 pts)
+    
+    Total: exactly 100 events.
+    """
+    if users_df is None:
+        users_path = os.path.join(DATA_DIR, "users.csv")
+        if os.path.exists(users_path):
+            users_df = pd.read_csv(users_path)
+        else:
+            users_df = generate_users()
+
+    user_map = {row["user_id"]: row for row in users_df.to_dict(orient="records")}
+    all_user_ids = sorted(list(user_map.keys()))
+
+    events = []
+    
+    # -------------------------------------------------------------------------
+    # 1. EXACTLY 5 CRITICAL / HIGH REAL THREAT ALERTS (Scores: 75 - 100 pts)
+    # -------------------------------------------------------------------------
+    # Threat 1: Stolen Credentials - Finance Exfiltration (EMP_014)
+    u14 = user_map["EMP_014"]
+    events.append({
+        "timestamp": "2026-09-24 02:15:12",
+        "user_id": u14["user_id"],
+        "user_name": u14["user_name"],
+        "department": u14["department"],
+        "role": u14["role"],
+        "event_type": "file_download",
+        "login_status": "success",
+        "source_ip": "185.220.101.5",
+        "country": "Russia",
+        "city": "Moscow",
+        "device_id": "UNKNOWN_DEV_X9",
+        "known_device": False,
+        "resource": "payroll_2026_master.xlsx",
+        "resource_type": "file",
+        "resource_sensitivity": "critical",
+        "download_mb": 2048.0,
+        "scenario_tag": "stress_threat_finance_compromise",
+    })
+
+    # Threat 2: Disgruntled Developer - Source Code Exfiltration (EMP_022)
+    u22 = user_map["EMP_022"]
+    events.append({
+        "timestamp": "2026-09-24 01:30:15",
+        "user_id": u22["user_id"],
+        "user_name": u22["user_name"],
+        "department": u22["department"],
+        "role": u22["role"],
+        "event_type": "file_download",
+        "login_status": "success",
+        "source_ip": "122.171.18.22",
+        "country": u22["normal_country"],
+        "city": u22["normal_city"],
+        "device_id": u22["known_device_id"],
+        "known_device": True,
+        "resource": "core_proprietary_source_code.zip",
+        "resource_type": "file",
+        "resource_sensitivity": "critical",
+        "download_mb": 3500.0,
+        "scenario_tag": "stress_threat_dev_exfiltration",
+    })
+
+    # Threat 3: Privilege Misuse - Sales Accessing HR Salaries (EMP_008)
+    u08 = user_map["EMP_008"]
+    events.append({
+        "timestamp": "2026-09-24 11:15:20",
+        "user_id": u08["user_id"],
+        "user_name": u08["user_name"],
+        "department": u08["department"],
+        "role": u08["role"],
+        "event_type": "file_download",
+        "login_status": "success",
+        "source_ip": "117.216.45.8",
+        "country": u08["normal_country"],
+        "city": u08["normal_city"],
+        "device_id": u08["known_device_id"],
+        "known_device": True,
+        "resource": "executive_salaries_and_bonuses.xlsx",
+        "resource_type": "file",
+        "resource_sensitivity": "high",
+        "download_mb": 12.0,
+        "scenario_tag": "stress_threat_privilege_misuse",
+    })
+
+    # Threat 4: Account Takeover - Rapid Brute Force into SSN theft (EMP_031)
+    u31 = user_map["EMP_031"]
+    events.append({
+        "timestamp": "2026-09-24 08:08:15",
+        "user_id": u31["user_id"],
+        "user_name": u31["user_name"],
+        "department": u31["department"],
+        "role": u31["role"],
+        "event_type": "file_download",
+        "login_status": "success",
+        "source_ip": "194.26.29.112",
+        "country": "Netherlands",
+        "city": "Amsterdam",
+        "device_id": "ATTACKER_BOX_88",
+        "known_device": False,
+        "resource": "employee_ssn_records.csv",
+        "resource_type": "file",
+        "resource_sensitivity": "critical",
+        "download_mb": 45.0,
+        "scenario_tag": "stress_threat_account_takeover",
+    })
+
+    # Threat 5: Legal Breach - Massive Confidential Merger File Theft (EMP_018)
+    u18 = user_map.get("EMP_018", user_map["EMP_001"])
+    events.append({
+        "timestamp": "2026-09-24 23:45:00",
+        "user_id": u18["user_id"],
+        "user_name": u18["user_name"],
+        "department": u18["department"],
+        "role": u18["role"],
+        "event_type": "file_download",
+        "login_status": "success",
+        "source_ip": "221.192.199.44",
+        "country": "China",
+        "city": "Beijing",
+        "device_id": "DEV_COMPROMISED_99",
+        "known_device": False,
+        "resource": "merger_acquisition_confidential.pdf",
+        "resource_type": "file",
+        "resource_sensitivity": "critical",
+        "download_mb": 4200.0,
+        "scenario_tag": "stress_threat_legal_exfiltration",
+    })
+
+    # -------------------------------------------------------------------------
+    # 2. EXACTLY 8 MILD ANOMALIES / BENIGN FALSE POSITIVES (Scores: 15 - 35 pts)
+    # -------------------------------------------------------------------------
+    mild_definitions = [
+        ("EMP_005", "2026-09-24 23:20:00", "system_patch_logs.txt", "low", 5.0, True, None),
+        ("EMP_011", "2026-09-24 19:15:00", "social_media_calendar.xlsx", "low", 2.0, True, None),
+        ("EMP_025", "2026-09-24 07:45:00", "dev_environment_setup.md", "low", 1.0, True, None),
+        ("EMP_033", "2026-09-24 14:10:00", "vendor_invoices_sep.pdf", "low", 3.5, False, "DEV_EMP_033_TABLET"),
+        ("EMP_042", "2026-09-24 20:30:00", "crm_leads_september.csv", "medium", 4.0, True, None),
+        ("EMP_003", "2026-09-24 10:15:00", "employee_handbook_v4.pdf", "low", 1.2, False, "DEV_EMP_003_HOME"),
+        ("EMP_019", "2026-09-24 22:00:00", "server_inventory_audit.xlsx", "low", 2.0, True, None),
+        ("EMP_027", "2026-09-24 21:10:00", "api_service_build.tar.gz", "medium", 18.0, True, None),
+    ]
+
+    for uid, ts, res, sens, dl, known_dev, alt_dev in mild_definitions:
+        u = user_map.get(uid, user_map["EMP_001"])
+        dev = alt_dev if alt_dev else u["known_device_id"]
+        events.append({
+            "timestamp": ts,
+            "user_id": u["user_id"],
+            "user_name": u["user_name"],
+            "department": u["department"],
+            "role": u["role"],
+            "event_type": "file_download" if dl > 0 else "login",
+            "login_status": "success",
+            "source_ip": "106.51.72.50",
+            "country": u["normal_country"],
+            "city": u["normal_city"],
+            "device_id": dev,
+            "known_device": known_dev,
+            "resource": res,
+            "resource_type": "file",
+            "resource_sensitivity": sens,
+            "download_mb": dl,
+            "scenario_tag": "stress_benign_noise",
+        })
+
+    # -------------------------------------------------------------------------
+    # 3. EXACTLY 87 NORMAL ROUTINE LOGS (Risk Score: 0 pts)
+    # -------------------------------------------------------------------------
+    # Distribute 87 events across employees during regular working hours (9:00 - 17:30)
+    needed_normal = 87
+    normal_users = [user_map[uid] for uid in all_user_ids if uid not in ["EMP_014", "EMP_022", "EMP_031"]]
+    
+    for i in range(needed_normal):
+        u = normal_users[i % len(normal_users)]
+        dept = u["department"]
+        dept_res_list = DEPARTMENT_RESOURCES.get(dept, DEPARTMENT_RESOURCES["Engineering"])
+        res_name, res_type, res_sens = dept_res_list[i % len(dept_res_list)]
+
+        # Time strictly between 09:15 and 17:45
+        hour = 9 + ((i * 11) % 9)  # 9 through 17
+        minute = (i * 17) % 60
+        second = (i * 23) % 60
+        ts = f"2026-09-24 {hour:02d}:{minute:02d}:{second:02d}"
+
+        is_dl = (i % 3) == 0
+        dl_amt = round(1.0 + ((i * 1.7) % 10.0), 2) if is_dl else 0.0
+
+        events.append({
+            "timestamp": ts,
+            "user_id": u["user_id"],
+            "user_name": u["user_name"],
+            "department": dept,
+            "role": u["role"],
+            "event_type": "file_download" if is_dl else "file_access",
+            "login_status": "success",
+            "source_ip": "106.51.72.100",
+            "country": u["normal_country"],
+            "city": u["normal_city"],
+            "device_id": u["known_device_id"],
+            "known_device": True,
+            "resource": res_name,
+            "resource_type": res_type,
+            "resource_sensitivity": "low" if res_sens == "low" else "medium",
+            "download_mb": dl_amt,
+            "scenario_tag": "stress_normal_routine",
+        })
+
+    # Sort strictly chronologically
+    events.sort(key=lambda x: x["timestamp"])
+
+    # Assign event IDs
+    for idx, e in enumerate(events, start=1):
+        e["event_id"] = f"EVT_STRESS_{idx:03d}"
+
+    return events
+
+
 def build_and_save_dataset() -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Generate both users and activity logs, save them to data/ directory, and return DataFrames."""
     os.makedirs(DATA_DIR, exist_ok=True)

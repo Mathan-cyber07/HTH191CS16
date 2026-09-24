@@ -132,3 +132,24 @@ def test_scenario_e_details():
     assert "EMP_005" in scen_e["user_id"].values
     assert (scen_e["resource_sensitivity"] == "low").all()
     assert (scen_e["download_mb"] == 5.0).any()
+
+
+def test_simulate_100_events():
+    """Verify that simulate_100_events generates exactly 100 events with 5 threats, 8 mild anomalies, and 87 normal logs."""
+    from src.generator import simulate_100_events
+    events = simulate_100_events()
+
+    assert len(events) == 100, f"Expected 100 events, got {len(events)}"
+
+    threat_events = [e for e in events if e["scenario_tag"].startswith("stress_threat_")]
+    mild_events = [e for e in events if e["scenario_tag"] == "stress_benign_noise"]
+    normal_events = [e for e in events if e["scenario_tag"] == "stress_normal_routine"]
+
+    assert len(threat_events) == 5, f"Expected exactly 5 critical threats, got {len(threat_events)}"
+    assert len(mild_events) == 8, f"Expected 8 mild anomalies, got {len(mild_events)}"
+    assert len(normal_events) == 87, f"Expected 87 normal events, got {len(normal_events)}"
+
+    # Ensure chronological order
+    timestamps = [e["timestamp"] for e in events]
+    assert timestamps == sorted(timestamps)
+
