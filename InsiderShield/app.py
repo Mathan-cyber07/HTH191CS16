@@ -272,6 +272,37 @@ if "user_account_status" not in st.session_state:
         "EMP_005": "Active",
     }
 
+if "auto_policy_enabled" not in st.session_state:
+    st.session_state.auto_policy_enabled = False
+
+if "auto_policy_threshold" not in st.session_state:
+    st.session_state.auto_policy_threshold = 80
+
+if "containment_reason" not in st.session_state:
+    st.session_state.containment_reason = {}
+
+if "manual_restored_users" not in st.session_state:
+    st.session_state.manual_restored_users = set()
+
+
+# -----------------------------------------------------------------------------
+# SOAR: Automated Containment Policy Engine
+# -----------------------------------------------------------------------------
+def apply_automated_policy():
+    """Evaluate all active incidents and auto-suspend users that exceed the policy threshold."""
+    if not st.session_state.auto_policy_enabled:
+        return
+    threshold = st.session_state.auto_policy_threshold
+    for inc in st.session_state.incidents:
+        u = inc.get("user_id", "")
+        inc_id = inc.get("incident_id", "")
+        score = inc.get("risk_score", 0)
+        if score >= threshold and u not in st.session_state.manual_restored_users:
+            st.session_state.user_account_status[u] = "Suspended / Banned"
+            reason_text = f"Automated SOAR Policy (Risk Score {score} >= {threshold})"
+            st.session_state.containment_reason[u] = reason_text
+            st.session_state.incident_status_override[inc_id] = f"AUTO-SUSPENDED (Policy >= {threshold})"
+
 
 # -----------------------------------------------------------------------------
 # Global Navigation Sidebar
@@ -726,6 +757,53 @@ elif view_selection.startswith("🔍"):
                 "Notice how the 5 critical/high threats are prioritized at the top of the list, while 83 normal events were suppressed."
             )
 
+        # ── SOAR Policy Configuration Card ──────────────────────────────────
+        soar_border = "#22c55e" if st.session_state.auto_policy_enabled else "#f59e0b"
+        soar_status_badge = (
+            f"<span style='background:#15803d; color:#bbf7d0; padding:3px 10px; border-radius:4px; font-weight:700; font-size:12px;'>"
+            f"⚡ AUTO-CONTAINMENT ACTIVE (>= {st.session_state.auto_policy_threshold})</span>"
+            if st.session_state.auto_policy_enabled
+            else "<span style='background:#78350f; color:#fde68a; padding:3px 10px; border-radius:4px; font-weight:700; font-size:12px;'>"
+                 "🟡 MANUAL MODE — Auto-Policy Disabled</span>"
+        )
+        st.markdown(
+            f"""
+            <div style='background-color:#0f172a; border: 2px solid {soar_border}; border-radius:10px; padding:16px; margin-bottom:16px;'>
+                <div style='font-size:16px; font-weight:700; color:#f8fafc; margin-bottom:8px;'>
+                    ⚡ Automated Policy Response (SOAR Configuration)
+                </div>
+                <div style='font-size:13px; color:#94a3b8; margin-bottom:10px;'>
+                    Configure a risk-score threshold. Any incident at or above this score will be automatically suspended when the policy is active.
+                </div>
+                {soar_status_badge}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        soar_col1, soar_col2 = st.columns([1, 2])
+        with soar_col1:
+            new_enabled = st.toggle(
+                "Enable Automated Containment Policy",
+                value=st.session_state.auto_policy_enabled,
+                key="soar_toggle",
+            )
+        with soar_col2:
+            new_threshold = st.slider(
+                "Automated Ban Threshold (Risk Score)",
+                min_value=0,
+                max_value=100,
+                value=st.session_state.auto_policy_threshold,
+                step=5,
+                key="soar_slider",
+            )
+        if new_enabled != st.session_state.auto_policy_enabled or new_threshold != st.session_state.auto_policy_threshold:
+            st.session_state.auto_policy_enabled = new_enabled
+            st.session_state.auto_policy_threshold = new_threshold
+            apply_automated_policy()
+            st.rerun()
+
+        st.markdown("---")
+
         selected_label = st.selectbox("Select Incident to Investigate:", list(inc_map.keys()), index=default_index)
         sel_inc = inc_map[selected_label]
         u_id = sel_inc["user_id"]
@@ -880,6 +958,34 @@ elif view_selection.startswith("🔍"):
 
         u_acct_status = st.session_state.user_account_status.get(u_id, "Active")
         inc_id = sel_inc["incident_id"]
+        containment_reason = st.session_state.containment_reason.get(u_id, "")
+        is_auto_suspended = "Automated SOAR Policy" in containment_reason
+
+        # Account containment status badge
+        if u_acct_status == "Suspended / Banned":
+            if is_auto_suspended:
+                st.markdown(
+                    f"<div style='background:#450a0a; border:2px solid #ef4444; border-radius:8px; padding:10px 16px; margin-bottom:12px;'>"
+                    f"<span style='font-size:15px; font-weight:800; color:#fca5a5;'>🔴 AUTO-SUSPENDED BY POLICY</span>"
+                    f"&nbsp;&nbsp;<code style='font-size:12px; color:#fecaca;'>{containment_reason}</code>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f"<div style='background:#450a0a; border:1px solid #f97316; border-radius:8px; padding:10px 16px; margin-bottom:12px;'>"
+                    f"<span style='font-size:15px; font-weight:800; color:#fdba74;'>🔒 MANUALLY SUSPENDED BY ANALYST</span>"
+                    f"&nbsp;&nbsp;<code style='font-size:12px; color:#fed7aa;'>{containment_reason or 'Manually Locked by Analyst'}</code>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+        else:
+            st.markdown(
+                "<div style='background:#064e3b; border:1px solid #10b981; border-radius:8px; padding:10px 16px; margin-bottom:12px;'>"
+                "<span style='font-size:15px; font-weight:700; color:#a7f3d0;'>🟢 ACCOUNT ACTIVE — No Containment Action</span>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
 
         c_lock, c_unban, c_benign, c_esc = st.columns(4)
 
@@ -888,6 +994,8 @@ elif view_selection.startswith("🔍"):
             if st.button(lock_label, key=f"btn_lock_{inc_id}", type="primary" if u_acct_status != "Suspended / Banned" else "secondary", use_container_width=True):
                 st.session_state.user_account_status[u_id] = "Suspended / Banned"
                 st.session_state.incident_status_override[inc_id] = "Account Locked & Contained"
+                st.session_state.containment_reason[u_id] = "Manually Locked by Analyst"
+                st.session_state.manual_restored_users.discard(u_id)
                 st.error(f"🚨 Action Executed: {sel_inc['user_name']}'s account is SUSPENDED. Portal session terminated!")
                 st.rerun()
 
@@ -896,6 +1004,8 @@ elif view_selection.startswith("🔍"):
             if st.button(unban_label, key=f"btn_unban_{inc_id}", use_container_width=True):
                 st.session_state.user_account_status[u_id] = "Active"
                 st.session_state.incident_status_override[inc_id] = "Resolved (Account Restored)"
+                st.session_state.containment_reason[u_id] = "Manually Restored by Analyst"
+                st.session_state.manual_restored_users.add(u_id)
                 st.success(f"✅ Access Restored: {sel_inc['user_name']}'s account status set to ACTIVE. Portal login re-enabled.")
                 st.rerun()
 
@@ -1021,12 +1131,16 @@ elif view_selection.startswith("👤"):
 
         st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
         if st.button("💥 SIMULATE 100-POINT CRITICAL ATTACK", type="primary", use_container_width=True):
+            # Remove from manual-restore whitelist so policy can re-evaluate
+            st.session_state.manual_restored_users.discard(selected_emp_id)
             st.session_state.active_scenario = "scenario_a_compromised_finance"
             ev, fl, inc = process_simulation("scenario_a_compromised_finance")
             st.session_state.sim_events = ev
             st.session_state.sim_flagged = fl
             st.session_state.incidents = inc
             st.session_state.live_stream_active = True
+            # Immediately apply SOAR policy if enabled
+            apply_automated_policy()
 
             st.error(
                 "🚨 **CRITICAL 100-POINT ATTACK INJECTED!**\n\n"
@@ -1035,23 +1149,32 @@ elif view_selection.startswith("👤"):
                 "• Event 3: Mass Exfiltration of **2,048 MB**\n\n"
                 "👉 **Next Step:** Switch to **View 2 (Capacity Queue)** or **View 3 (Investigator)** to see the SOC detect this incident and click **`[🔒 Lock / Suspend Account]`** to contain the breach!"
             )
+            st.rerun()
+
 
     # -------------------------------------------------------------------------
     # CASE B: ACCOUNT IS SUSPENDED / BANNED
     # -------------------------------------------------------------------------
     else:
+        v4_containment_reason = st.session_state.containment_reason.get(selected_emp_id, "Manually Locked by Analyst")
+        v4_is_auto = "Automated SOAR Policy" in v4_containment_reason
+        v4_trigger_label = "⚡ AUTOMATED SOAR POLICY" if v4_is_auto else "🔒 MANUAL ANALYST ACTION"
+        v4_trigger_color = "#ef4444" if v4_is_auto else "#f97316"
+
         st.markdown(
-            """
-            <div style='background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); border: 2px solid #ef4444; border-radius: 10px; padding: 24px; color: white; margin-bottom: 20px;'>
+            f"""
+            <div style='background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); border: 2px solid {v4_trigger_color}; border-radius: 10px; padding: 24px; color: white; margin-bottom: 20px;'>
                 <div style='font-size: 24px; font-weight: 800; display:flex; align-items:center; gap:10px;'>
                     🚫 ACCESS DENIED — ACCOUNT SUSPENDED
+                    &nbsp;<span style='font-size:13px; font-weight:700; background:{v4_trigger_color}; color:white; padding:4px 10px; border-radius:4px;'>{v4_trigger_label}</span>
                 </div>
                 <div style='font-size: 15px; margin-top: 10px; line-height: 1.5; color: #fecaca;'>
                     Your Active Directory session has been terminated and access revoked by the <b>Security Operations Center (SOC)</b> due to critical behavioral anomalies detected under your credentials.
                 </div>
-                <hr style='border-color: #ef4444; margin: 16px 0;'/>
+                <hr style='border-color: {v4_trigger_color}; margin: 16px 0;'/>
                 <div style='font-size: 13px; color: #fca5a5; line-height: 1.5;'>
-                    <b>Containment Reference:</b> Incident Containment Order #SEC-2026-0924 &bull; <b>Status:</b> Locked & Contained<br/>
+                    <b>Containment Trigger:</b> <code>{v4_containment_reason}</code><br/>
+                    <b>Containment Reference:</b> Incident Containment Order #SEC-2026-0924 &bull; <b>Status:</b> Locked &amp; Contained<br/>
                     <b>Action Required:</b> Contact IT Security Helpdesk (<code>soc-triage@corp.local</code>) to undergo identity verification.
                 </div>
             </div>
@@ -1059,8 +1182,10 @@ elif view_selection.startswith("👤"):
             unsafe_allow_html=True,
         )
 
+
         st.subheader("🔒 Corporate Single Sign-On (SSO) Login")
         st.caption("Active Directory authentication is currently disabled for this principal:")
+
 
         f_col1, f_col2 = st.columns([2, 1])
         with f_col1:
